@@ -10,8 +10,8 @@ CPUS=`getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu`
 
 ZSTD_DESTINATION=zstd
 ZSTD_REPO=https://github.com/facebook/zstd.git
-ZSTD_BRANCH=master
-ZSTD_TAG=v1.5.2
+ZSTD_TAG=v1.5.2 # Tag is just for the information purpose only, we checkout the commit instead
+ZSTD_COMMIT="e47e674cd09583ff0503f0f6defd6d23d8b718d3"
 ZSTD_SUCCESS=lib/libzstd.a
 
 fail_check()
@@ -26,23 +26,21 @@ fail_check()
 
 CheckoutLib()
 {
-    if [ -f "$DEPS_LOCATION/$4/$5" ]; then
-        echo "$4 fork already exist. delete $DEPS_LOCATION/$4 for a fresh checkout ..."
+    if [ -f "${DEPS_LOCATION}/${ZSTD_DESTINATION}/${ZSTD_SUCCESS}" ]; then
+        echo "${ZSTD_DESTINATION} fork already exist. delete ${DEPS_LOCATION}/${ZSTD_DESTINATION} for a fresh checkout ..."
     else
-        #repo rev branch destination
+        echo "repo=${ZSTD_REPO} tag=${ZSTD_TAG} commit=${ZSTD_COMMIT}"
 
-        echo "repo=$1 tag=$2 branch=$3"
+        mkdir -p ${DEPS_LOCATION}
+        pushd ${DEPS_LOCATION}
 
-        mkdir -p $DEPS_LOCATION
-        pushd $DEPS_LOCATION
-
-        if [ ! -d "$4" ]; then
-            fail_check git clone -b $3 $1 $4
+        if [ ! -d "${ZSTD_DESTINATION}" ]; then
+            fail_check git clone "${ZSTD_REPO}" "${ZSTD_DESTINATION}"
         fi
 
-        pushd $4
-        fail_check git checkout $2
-        BuildLibrary $4
+        pushd "${ZSTD_DESTINATION}"
+        fail_check git checkout --detach "${ZSTD_COMMIT}"
+        BuildLibrary ${ZSTD_DESTINATION}
         popd
         popd
 
@@ -67,4 +65,4 @@ BuildLibrary()
     rm -rf lib/*.dylib
 }
 
-CheckoutLib $ZSTD_REPO $ZSTD_TAG $ZSTD_BRANCH $ZSTD_DESTINATION $ZSTD_SUCCESS
+CheckoutLib
