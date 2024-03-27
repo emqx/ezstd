@@ -11,7 +11,8 @@ CPUS=`getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu`
 ZSTD_DESTINATION=zstd
 ZSTD_REPO=https://github.com/facebook/zstd.git
 ZSTD_BRANCH=master
-ZSTD_TAG=v1.5.2
+ZSTD_TAG=v1.5.2 # Tag is just for the information purpose only, we checkout the commit instead
+ZSTD_COMMIT="e47e674cd09583ff0503f0f6defd6d23d8b718d3"
 ZSTD_SUCCESS=lib/libzstd.a
 
 fail_check()
@@ -37,11 +38,11 @@ CheckoutLib()
         pushd $DEPS_LOCATION
 
         if [ ! -d "$4" ]; then
-            fail_check git clone -b $3 $1 $4
+            fail_check git clone "${ZSTD_REPO}" "${ZSTD_DESTINATION}"
         fi
 
-        pushd $4
-        fail_check git checkout $2
+        pushd "${ZSTD_DESTINATION}"
+        fail_check git checkout --detach "${ZSTD_COMMIT}"
         BuildLibrary $4
         popd
         popd
@@ -67,4 +68,4 @@ BuildLibrary()
     rm -rf lib/*.dylib
 }
 
-CheckoutLib $ZSTD_REPO $ZSTD_TAG $ZSTD_BRANCH $ZSTD_DESTINATION $ZSTD_SUCCESS
+CheckoutLib
