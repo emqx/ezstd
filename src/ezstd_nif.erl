@@ -8,6 +8,7 @@
 -export([
     compress/2,
     decompress/1,
+    decompress/2,
     create_cdict/2,
     create_ddict/1,
     compress_using_cdict/2,
@@ -41,6 +42,9 @@ compress(_Binary, _CompressionLevel) ->
     ?NOT_LOADED.
 
 decompress(_Binary) ->
+    ?NOT_LOADED.
+
+decompress(_Binary, _ExpectedSize) ->
     ?NOT_LOADED.
 
 create_cdict(_Binary, _CompressionLevel) ->

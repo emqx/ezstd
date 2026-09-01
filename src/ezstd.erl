@@ -8,6 +8,7 @@
     compress/1, 
     compress/2,
     decompress/1,
+    decompress/2,
     create_cdict/2,
     create_ddict/1,
     compress_using_cdict/2,
@@ -60,6 +61,11 @@ compress(Binary, CompressionLevel) ->
 -spec decompress(binary()) -> binary() | {error, any()}.
 decompress(Binary) ->
     ezstd_nif:decompress(Binary).
+
+%% @doc Decompresses the given binary into an output buffer of exactly ExpectedSize.
+-spec decompress(binary(), non_neg_integer()) -> binary() | {error, any()}.
+decompress(Binary, ExpectedSize) ->
+    ezstd_nif:decompress(Binary, ExpectedSize).
 
 returns_integers(Value) ->
     % the _dict_id functions only return non-integers when

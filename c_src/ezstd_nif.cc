@@ -268,9 +268,49 @@ static ERL_NIF_TERM zstd_nif_decompress(ErlNifEnv* env, int argc, const ERL_NIF_
     return out_term;
 }
 
+static ERL_NIF_TERM zstd_nif_decompress_bounded(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    UNUSED(argc);
+
+    ErlNifBinary bin;
+    ErlNifUInt64 expected_size;
+
+    if(!enif_inspect_binary(env, argv[0], &bin) ||
+       !enif_get_uint64(env, argv[1], &expected_size)) {
+        return make_badarg(env);
+    }
+
+    if(expected_size > SIZE_MAX) {
+        return make_error(env, "invalid_output_size");
+    }
+
+    ERL_NIF_TERM out_term;
+    uint8_t *destination_buffer = enif_make_new_binary(env, (size_t)expected_size, &out_term);
+    if(expected_size > 0 && destination_buffer == nullptr) {
+        return make_error(env, "failed_to_alloc");
+    }
+
+    size_t actual_decompressed_size = ZSTD_decompress(
+        destination_buffer,
+        (size_t)expected_size,
+        bin.data,
+        bin.size
+    );
+
+    if(ZSTD_isError(actual_decompressed_size)) {
+        return make_error(env, "failed_to_decompress");
+    }
+    if(actual_decompressed_size != expected_size) {
+        return make_error(env, "size_mismatch");
+    }
+
+    return out_term;
+}
+
 static ErlNifFunc nif_funcs[] = {
     {"compress", 2, zstd_nif_compress},
     {"decompress", 1, zstd_nif_decompress},
+    {"decompress", 2, zstd_nif_decompress_bounded},
     {"create_cdict", 2, zstd_nif_create_cdict},
     {"create_ddict", 1, zstd_nif_create_ddict},
     {"get_dict_id_from_ddict", 1, zstd_nif_get_dict_id_from_ddict},

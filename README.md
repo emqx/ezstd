@@ -16,6 +16,14 @@ This binding is based on zstd v1.5.2. In case you want to modify the zstd versio
 Plaintext = <<"contentcontentcontentcontent">>,
 Compressed = ezstd:compress(Plaintext, 1),
 Plaintext = ezstd:decompress(Compressed).
+
+For untrusted compressed input with a known output limit, use the bounded
+interface. It allocates at most `ExpectedSize` bytes and rejects frames whose
+decoded output does not have exactly that size:
+
+```erl
+Plaintext = ezstd:decompress(Compressed, byte_size(Plaintext)).
+```
 ```
 
 ### Compress and decompress using dictionary
